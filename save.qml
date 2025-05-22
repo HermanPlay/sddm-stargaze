@@ -1,4 +1,4 @@
-import QtQuick 6.9
+import QtQuick
 import QtQuick.Controls 6.9
 import SddmComponents 2.0
 
@@ -58,20 +58,31 @@ Rectangle {
             timeFont.family: "Oxygen"
         }
 
-        Rectangle {
+        Image {
             id: rectangle
             anchors.centerIn: parent
             width: Math.max(320, mainColumn.implicitWidth + 50)
-            height: Math.min(320, mainColumn.implicitHeight + 50)
+            height: Math.max(320, mainColumn.implicitHeight + 50)
 
-
-            color: "#60FFFFFF"
-            radius: 16
+            source: "rectangle.png"
 
             Column {
                 id: mainColumn
                 anchors.centerIn: parent
                 spacing: 12
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    color: "black"
+                    verticalAlignment: Text.AlignVCenter
+                    height: text.implicitHeight
+                    width: parent.width
+                    text: textConstants.welcomeText.arg(sddm.hostName)
+                    wrapMode: Text.WordWrap
+                    font.pixelSize: 24
+                    elide: Text.ElideRight
+                    horizontalAlignment: Text.AlignHCenter
+                }
+
                 Column {
                     width: parent.width
                     spacing: 4
