@@ -191,7 +191,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.bottom: parent.bottom
             anchors.margins: 16
-            width: 280
+            width: 240
             spacing: 4
             z: 100
 
@@ -206,13 +206,14 @@ Rectangle {
                     text: textConstants.session
                     wrapMode: TextEdit.WordWrap
                     font.bold: true
-                    font.pixelSize: 12
+                    font.pixelSize: 11
+                    color: "white"
                 }
 
                 ComboBox {
                     id: session
-                    width: parent.width; height: 30
-                    font.pixelSize: 14
+                    width: parent.width; height: 20
+                    font.pixelSize: 11
                     arrowIcon: "angle-down.png"
                     model: sessionModel
                     index: sessionModel.lastIndex
@@ -231,13 +232,14 @@ Rectangle {
                     text: textConstants.layout
                     wrapMode: TextEdit.WordWrap
                     font.bold: true
-                    font.pixelSize: 12
+                    font.pixelSize: 11
+                    color: "white"
                 }
 
                 LayoutBox {
                     id: layoutBox
-                    width: parent.width; height: 30
-                    font.pixelSize: 14
+                    width: parent.width; height: 20
+                    font.pixelSize: 11
                     arrowIcon: "angle-down.png"
                     KeyNavigation.backtab: session; KeyNavigation.tab: loginButton
                 }
