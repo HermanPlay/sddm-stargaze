@@ -1,6 +1,6 @@
 import QtQuick 6.9
 import QtQuick.Controls 6.9
-import SddmComponents 2.0
+import SddmComponents 2.0 as Sddm
 
 Rectangle {
     id: container
@@ -10,9 +10,9 @@ Rectangle {
     LayoutMirroring.enabled: Qt.locale().textDirection == Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
 
-    property int sessionIndex: session.index
+    property int sessionIndex: session.currentIndex
 
-    TextConstants { id: textConstants }
+    Sddm.TextConstants { id: textConstants }
 
     Connections {
         target: sddm
@@ -33,26 +33,22 @@ Rectangle {
         }
     }
 
-    Background {
+    Image {
+        id: backgroundImage
         anchors.fill: parent
         source: config.background
         fillMode: Image.PreserveAspectCrop
-        onStatusChanged: {
-            if (status == Image.Error && source != config.defaultBackground) {
-                source = config.defaultBackground
-            }
-        }
     }
 
     Rectangle {
         anchors.fill: parent
         color: "transparent"
-        //visible: primaryScreen
 
-        Clock {
+        Sddm.Clock {
             id: clock
-            anchors.margins: 5
-            anchors.top: parent.top; anchors.right: parent.right
+            anchors.horizontalCenter: parent.horizontalCenter
+
+            y: (rectangle.y / 2) - (height / 2)
 
             color: "white"
             timeFont.family: "Oxygen"
@@ -72,6 +68,7 @@ Rectangle {
                 id: mainColumn
                 anchors.centerIn: parent
                 spacing: 12
+                width: parent.width * 0.7
                 Column {
                     width: parent.width
                     spacing: 4
@@ -83,7 +80,7 @@ Rectangle {
                         font.pixelSize: 12
                     }
 
-                    TextBox {
+                    Sddm.TextBox {
                         id: name
                         width: parent.width; height: 30
                         text: userModel.lastUser
@@ -111,7 +108,7 @@ Rectangle {
                         font.pixelSize: 12
                     }
 
-                    PasswordBox {
+                    Sddm.PasswordBox {
                         id: password
                         width: parent.width; height: 30
                         font.pixelSize: 14
@@ -129,11 +126,22 @@ Rectangle {
 
                 Column {
                     width: parent.width
-                    Text {
-                        id: errorMessage
+                    spacing : 4
+                    Row {
+
+                        spacing: 4
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: textConstants.prompt
-                        font.pixelSize: 10
+                        property int btnWidth: Math.max(loginButton.implicitWidth, 80) + 8
+                        Button {
+                            id: loginButton
+                            text: textConstants.login
+                            width: parent.btnWidth
+
+                            onClicked: sddm.login(name.text, password.text, sessionIndex)
+
+                            KeyNavigation.backtab: layoutBox; KeyNavigation.tab: shutdownButton
+                        }
+                            
                     }
                 }
 
@@ -143,30 +151,33 @@ Rectangle {
                     property int btnWidth: Math.max(loginButton.implicitWidth,
                                                     shutdownButton.implicitWidth,
                                                     rebootButton.implicitWidth, 80) + 8
-                    Button {
-                        id: loginButton
-                        text: textConstants.login
-                        width: parent.btnWidth
 
-                        onClicked: sddm.login(name.text, password.text, sessionIndex)
-
-                        KeyNavigation.backtab: layoutBox; KeyNavigation.tab: shutdownButton
-                    }
-
-                    Button {
+                    RoundButton {
                         id: shutdownButton
-                        text: textConstants.shutdown
-                        width: parent.btnWidth
+                        icon.source: config.powerIcon
+                        background: Rectangle {
+                            radius: 10
+                            color: "#FF0000" 
+                            opacity: shutdownButton.hovered ? 0.5 : 0.2
+                            border.color: "#FF000000"
+                            border.width: 1
+                        }
 
                         onClicked: sddm.powerOff()
 
                         KeyNavigation.backtab: loginButton; KeyNavigation.tab: rebootButton
                     }
 
-                    Button {
+                    RoundButton {
                         id: rebootButton
-                        text: textConstants.reboot
-                        width: parent.btnWidth
+                        icon.source: config.rebootIcon
+                        background: Rectangle {
+                            radius: 10
+                            color: "#FFFF00" 
+                            opacity: rebootButton.hovered ? 0.5 : 0.2
+                            border.color: "#FF000000"
+                            border.width: 1
+                        }
 
                         onClicked: sddm.reboot()
 
@@ -204,9 +215,23 @@ Rectangle {
                     id: session
                     width: parent.width; height: 20
                     font.pixelSize: 11
-                    arrowIcon: "angle-down.png"
                     model: sessionModel
-                    index: sessionModel.lastIndex
+                    currentIndex: sessionModel.lastIndex
+                    textRole: "name"
+                    delegate: ItemDelegate {
+                            id: delegate
+                            required property var model
+                            required property int index
+
+                            contentItem: Text {
+                                font.pointSize: 8
+                                text: delegate.model[session.textRole]
+                                color: "#000000"
+                                elide: Text.ElideRight
+                                verticalAlignment: Text.AlignVCenter
+                            }
+                            highlighted: session.highlightedIndex === index
+                    }
                     KeyNavigation.backtab: password; KeyNavigation.tab: layoutBox
                 }
             }
@@ -216,23 +241,6 @@ Rectangle {
                 spacing : 4
                 z: 101
 
-                Text {
-                    id: lblLayout
-                    width: parent.width
-                    text: textConstants.layout
-                    wrapMode: TextEdit.WordWrap
-                    font.bold: true
-                    font.pixelSize: 11
-                    color: "white"
-                }
-
-                LayoutBox {
-                    id: layoutBox
-                    width: parent.width; height: 20
-                    font.pixelSize: 11
-                    arrowIcon: "angle-down.png"
-                    KeyNavigation.backtab: session; KeyNavigation.tab: loginButton
-                }
             }
         }
     }
